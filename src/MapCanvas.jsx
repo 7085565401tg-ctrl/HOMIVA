@@ -7,7 +7,11 @@ export default function MapCanvas({ homes = [], value, onChange, onSelect, locat
   const element = useRef(null);
   const map = useRef(null);
   const pin = useRef(null);
+  const markerLayer = useRef(null);
+  const onSelectRef = useRef(onSelect);
   const initial = useRef(value);
+  const markerSignature = homes.map((home) => [home.id, home.price, home.locationPin?.latitude, home.locationPin?.longitude].join(':')).join('|');
+  onSelectRef.current = onSelect;
 
   useEffect(() => {
     if (!element.current || map.current) return undefined;
@@ -19,13 +23,7 @@ export default function MapCanvas({ homes = [], value, onChange, onSelect, locat
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(instance);
     map.current = instance;
-    homes.filter((home) => home.locationPin).forEach((home) => {
-      const point = [home.locationPin.latitude, home.locationPin.longitude];
-      const marker = L.marker(point, {
-        icon: L.divIcon({ className: 'homiva-map-marker', html: '<span>' + formatMoney(home.price) + '</span>', iconSize: [94, 34], iconAnchor: [47, 34] })
-      }).addTo(instance);
-      marker.on('click', () => onSelect?.(home));
-    });
+    markerLayer.current = L.layerGroup().addTo(instance);
     if (value) {
       pin.current = L.marker([value.latitude, value.longitude], { draggable: true, icon: L.divIcon({ className: 'owner-map-icon', html: '<span class="owner-map-pin"></span>', iconSize: [24, 32], iconAnchor: [12, 28] }) }).addTo(instance);
       pin.current.on('dragend', () => {
@@ -50,8 +48,26 @@ export default function MapCanvas({ homes = [], value, onChange, onSelect, locat
       instance.remove();
       map.current = null;
       pin.current = null;
+      markerLayer.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (!map.current || !markerLayer.current) return;
+    markerLayer.current.clearLayers();
+    const mappable = homes.filter((home) => home.locationPin);
+    const points = [];
+    mappable.forEach((home) => {
+      const point = [home.locationPin.latitude, home.locationPin.longitude];
+      points.push(point);
+      const marker = L.marker(point, {
+        icon: L.divIcon({ className: 'homiva-map-marker', html: '<span>' + formatMoney(home.price) + '</span>', iconSize: [94, 34], iconAnchor: [47, 34] })
+      }).addTo(markerLayer.current);
+      marker.on('click', () => onSelectRef.current?.(home));
+    });
+    if (points.length > 1) map.current.fitBounds(points, { padding: [24, 24], maxZoom: 13 });
+    else if (points.length === 1) map.current.setView(points[0], 12);
+  }, [markerSignature]);
 
   useEffect(() => {
     if (!map.current || !locateRequest || !navigator.geolocation) return;

@@ -1,17 +1,17 @@
 # HOMIVA production readiness report
 
-**Report date:** 2026-10-08  
-**Status:** Deployment prepared locally; production launch and live verification are blocked on provider projects and a GitHub remote. This is not a production success report.
+**Report date:** 2026-10-09
+**Status:** Local code and build checks pass, but production launch and live verification are blocked on provider projects. A GitHub `origin` remote is configured; current local fixes remain uncommitted. This is not a production success report.
 
 ## Deployment endpoints
 
 - **PUBLIC URL:** Not provisioned.
-- **FRONTEND:** Cloudflare Pages configuration is prepared in `public/_headers`; no Cloudflare Pages project or GitHub remote exists in this workspace.
+- **FRONTEND:** Cloudflare Pages configuration is prepared in `public/_headers`; no Cloudflare Pages project or public deployment exists in this workspace.
 - **DATABASE:** Supabase Free schema/migrations are prepared; no project exists here and migrations are not applied.
 - **AUTH:** Supabase Auth code is wired; dashboard URL, email-confirmation, and redirect settings are not configured.
 - **STORAGE:** Supabase Storage buckets and RLS are prepared in SQL; no live buckets or uploads have been tested.
 - **REALTIME:** `messages` publication and client subscription are prepared; no live channel has been tested.
-- **GITHUB:** No remote or GitHub repository is configured. The local `master` branch has no commits and the HOMIVA files are untracked.
+- **GITHUB:** `origin` is configured and `master` tracks `origin/master` at the initial project commit. Current local fixes are not yet committed or pushed.
 
 ## Requested production test results
 
@@ -47,7 +47,7 @@ Each `FAIL` below means the production test could not be run because there is no
 
 ## Security and mobile status
 
-- **SECURITY TEST:** **FAIL / pending live verification.** Source review and the workspace credential-pattern scan found no credential values; `npm audit --omit=dev` found 0 vulnerabilities. The live RLS, Storage, Auth, and response-header tests have not run.
+- **SECURITY TEST:** **FAIL / pending live verification.** Source review and the workspace credential-pattern scan found no credential values; `npm audit` found 0 vulnerabilities. The live RLS, Storage, Auth, and response-header tests have not run.
 - **MOBILE TEST:** **FAIL / pending.** Responsive styles are present, but no external browser or two-phone test was possible.
 - **LAPTOP-OFF TEST:** **FAIL / pending.** No public cloud URL exists to test while the laptop is off.
 
@@ -59,12 +59,13 @@ Each `FAIL` below means the production test could not be run because there is no
 - Added direct authenticated WebP uploads to private Supabase Storage, protected by owner-folder RLS, bucket MIME/size rules, signature checks, random paths, rollback cleanup, and a user-bound hourly/daily quota. No service-role key is required by this app.
 - Added profile display-name editing, signup/login/logout, password reset, listing editing/deletion, multiple photos, private exact address, approximate public map pin, expanded search filters, saved homes, conversation history/replies, unread state, Realtime subscription, and viewing cancellation/owner decisions.
 - Added Netlify configuration in an earlier deployment preparation and Cloudflare-compatible security headers in `public/_headers`. Cloudflare Pages supplies SPA fallback when no root `404.html` exists. The SEO generator creates production metadata/sitemap when `CONTEXT` and `URL` are configured.
+- Fixed the CSP to allow OpenStreetMap tile images. Local browser fixture verified OSM tiles, marker selection and refresh, map-click pin placement, and pin dragging. Fixed stale markers when results change and made sign-out preserve the session if the sign-out request fails.
 - Added safe public `.env.example`, `.gitignore` updates, and updated project, database, and security documentation.
 
 ## Known limitations
 
-- No GitHub repository, Supabase project, Cloudflare Pages project, or real production URL is configured.
-- Database SQL has not been applied or parsed by a live PostgreSQL instance. Auth redirects, Storage policies, Realtime, email delivery, and the serverless-free upload path still need live tests.
+- Supabase project, Cloudflare Pages project, and real production URL are not configured. No local `.env` file exists; only `.env.example` is present.
+- Database SQL has not been applied or parsed by a PostgreSQL instance; `psql`, Docker, and the Supabase CLI are unavailable locally. Auth redirects, Storage policies, Realtime, email delivery, and the serverless-free upload path still need live tests.
 - A production build generates static listing metadata and sitemap entries for homes published at that build. New listings appear in app queries immediately but need a redeploy to refresh crawler metadata.
 - The current interface is INR/Pune-focused. Currency and country columns exist, but localized pricing/search and multi-market operations are not complete.
 - There is no verification moderator workflow, notification center, profile-photo flow, or account deletion/anonymization process. Verification status stays unverified until a trusted review operation exists.
@@ -73,7 +74,7 @@ Each `FAIL` below means the production test could not be run because there is no
 
 ## Manual provider actions required
 
-1. **GitHub:** Create a new private repository named `HOMIVA` without initializing another README/license. This checkout has no remote or commit. Share only the repository URL (never a token); then the source can be reviewed and pushed.
+1. **GitHub:** Review, commit, and push the current local fixes to the configured `origin`. Confirm no `.env` file or credential is included in the commit.
 2. **Supabase:** Create a new Free project for HOMIVA in the intended region. In **SQL Editor**, apply every file in `supabase/migrations/` in filename order and confirm all finish successfully.
 3. **Cloudflare Pages:** Connect the HOMIVA GitHub repository. Set the Vite framework, repository root, production branch, `npm run build`, and `dist`. Add the two Supabase Vite variables. For SEO output, set `CONTEXT=production` and `URL=<canonical HTTPS origin>` in Production; set `CONTEXT=deploy-preview` in Preview.
 4. **Supabase Auth:** Set **Authentication → URL Configuration → Site URL** to the production HTTPS origin and allow the production redirect origin. Verify confirmation and password-reset links.

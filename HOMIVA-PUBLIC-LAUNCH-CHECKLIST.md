@@ -15,7 +15,7 @@ This file separates code readiness from the account access and operational work 
 
 ## Required before a worldwide public URL
 
-1. **GitHub source:** create/select the HOMIVA repository, commit the source, and connect it to Cloudflare Pages. The current checkout has no remote and its source files are untracked. Never stage `.env` files or credentials.
+1. **GitHub source:** this checkout has an `origin` remote and `master` tracks `origin/master`. Review and commit the current local changes, then push them before connecting or updating Cloudflare Pages. Never stage `.env` files or credentials.
 2. **Cloudflare Pages:** choose the Vite framework, root directory, production branch, build command `npm run build`, and output directory `dist`. Enable automatic deployment from GitHub.
 3. **Supabase production project:** add the two required public Vite variables in the Cloudflare Production build environment. Never use a Supabase secret/service-role key in browser variables.
 4. **Database and Storage:** apply all four SQL migrations in filename order. Confirm RLS policies, triggers, private buckets, image limits, and Realtime publication in the actual project.
@@ -38,4 +38,4 @@ Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Cloudflare Pages b
 
 ## Current limitation
 
-No GitHub remote, Cloudflare Pages project, Supabase project, production origin, or public deployment is configured in this checkout. Cloudflare Pages can provide a public `pages.dev` origin; a custom domain and DNS setup are optional. Live Auth, database, Storage, Realtime, and security-header behavior still require provider-side verification.
+The GitHub `origin` remote is configured, but no Cloudflare Pages project, Supabase project, production origin, or public deployment is configured in this checkout. Cloudflare Pages can provide a public `pages.dev` origin; a custom domain and DNS setup are optional. Live Auth, database, Storage, Realtime, and security-header behavior still require provider-side verification.

@@ -63,7 +63,7 @@ See [HOMIVA_DATABASE_DESIGN.md](./HOMIVA_DATABASE_DESIGN.md) for the data model,
 
 ## Cloudflare Pages and GitHub deployment
 
-1. Push the HOMIVA source to a GitHub repository. This checkout currently has no Git remote and its project files are untracked; `.gitignore` excludes `.env` and `.env.*` except the blank `.env.example`.
+1. This checkout is linked to a GitHub `origin`, and `master` tracks `origin/master`. Review and commit the current working-tree changes, then push them before connecting or updating Cloudflare Pages. `.gitignore` excludes `.env` and `.env.*` except the blank `.env.example`.
 2. In Cloudflare, create a **Pages** project and connect that GitHub repository. Choose the Vite preset, repository root, production branch, build command `npm run build`, and output directory `dist`. Leave automatic Git deployments enabled.
 3. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as Cloudflare **Production** build variables. Add a separate staging Supabase project to Preview only if preview builds need working data features.
 4. Set `CONTEXT=production` and `URL=<canonical HTTPS origin>` in the Cloudflare Production build environment for sitemap/canonical generation. Set `CONTEXT=deploy-preview` in Preview. Update `URL` if the canonical domain changes.

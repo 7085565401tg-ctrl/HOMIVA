@@ -698,7 +698,8 @@ export default function App() {
   };
   const signIn = (mode = 'login') => { setAuthMode(mode); setAfterAuth(null); setDialog('auth'); };
   const signOut = async () => {
-    try { await api('/api/auth/logout', { method: 'POST', body: jsonBody({}) }); } catch {}
+    try { await api('/api/auth/logout', { method: 'POST', body: jsonBody({}) }); }
+    catch (error) { setToast(error.message || 'You could not be signed out. Please try again.'); return; }
     setUser(null); setScreen('home'); setDialog(''); setReplyConversationId(''); setConversation(null); setConversationMessages([]); setToast('You’re signed out.');
   };
   const toggleSaved = async (id, force = false, signedUser = user) => {
