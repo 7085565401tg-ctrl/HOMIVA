@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.netlify/
+.supabase/
+server/*.sqlite
+server/*.sqlite-shm
+server/*.sqlite-wal
+server/uploads/
+.env
+.env.*
+!.env.example
+npm-debug.log*
